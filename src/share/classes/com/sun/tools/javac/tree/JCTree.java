@@ -39,9 +39,11 @@ import com.sun.source.tree.MemberReferenceTree.ReferenceMode;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Scope.*;
 import com.sun.tools.javac.code.Symbol.*;
+import com.sun.tools.javac.parser.Tokens.TokenKind;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 import com.sun.tools.javac.util.List;
+
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 
 /**
@@ -499,6 +501,8 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         /* An object encapsulating ending positions of source ranges indexed by
          * the tree nodes they belong to. Defined only if option -Xjcov is set. */
         public EndPosTable endPositions = null;
+        // other positions
+        public Map<JCTree, Map<TokenKind, Set<Integer>>> otherPositions = null;
         protected JCCompilationUnit(List<JCAnnotation> packageAnnotations,
                         JCExpression pid,
                         List<JCTree> defs,
@@ -2029,12 +2033,19 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public TypeTag typetag;
         /** value representation */
         public Object value;
-        protected JCLiteral(TypeTag typetag, Object value) {
+        public String format;
+        protected JCLiteral(TypeTag typetag, Object value, String format) {
             this.typetag = typetag;
             this.value = value;
+            this.format = format;
         }
         @Override
         public void accept(Visitor v) { v.visitLiteral(this); }
+        
+        public String getFormat()
+        {
+        	return format;
+        }
 
         public Kind getKind() {
             return typetag.getKindLiteral();

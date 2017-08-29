@@ -119,7 +119,7 @@ public class SymbolMetadata {
     }
 
     public void setDeclarationAttributes(List<Attribute.Compound> a) {
-        Assert.check(pendingCompletion() || !isStarted());
+        //Assert.check(pendingCompletion() || !isStarted()); // FIXME COLUMBUS HACK
         if (a == null) {
             throw new NullPointerException();
         }
@@ -158,7 +158,14 @@ public class SymbolMetadata {
     }
 
     public void setDeclarationAttributesWithCompletion(final Annotate.AnnotateRepeatedContext<Attribute.Compound> ctx) {
-        Assert.check(pendingCompletion() || (!isStarted() && sym.kind == PCK));
+        // FIXME COLUMBUS HACK BEGIN
+        //Assert.check(pendingCompletion() || (!isStarted() && sym.kind == PCK));
+        try {
+            Assert.check(pendingCompletion() || (!isStarted() && sym.kind == PCK));
+        } catch (AssertionError e) {
+            ctx.log.rawError(Position.NOPOS, "[COLUMBUS HACK] Catch an AssertionError at SymbolMetadata.setDeclarationAttributesWithCompletion()");
+        }
+        // COLUMBUS HACK END
         this.setDeclarationAttributes(getAttributesForCompletion(ctx));
     }
 

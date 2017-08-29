@@ -706,6 +706,10 @@ public class JavaTokenizer {
                     comments.prepend(comment);
         }
 
+    public UnicodeReader getReader() {
+        return reader;
+    }
+
     /** Return the position where a lexical error occurred;
      */
     public int errPos() {

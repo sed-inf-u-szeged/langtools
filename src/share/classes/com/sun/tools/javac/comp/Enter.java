@@ -349,7 +349,9 @@ public class Enter extends JCTree.Visitor {
             PackageSymbol packge = (PackageSymbol)owner;
             for (Symbol q = packge; q != null && q.kind == PCK; q = q.owner)
                 q.flags_field |= EXISTS;
-            c = reader.enterClass(tree.name, packge);
+            //COLUMBUS_HACK
+            c = reader.enterHackedIfDuplicated(tree.name, packge);
+            //c = reader.enterClass_hacked(tree.name, packge);
             packge.members().enterIfAbsent(c);
             if ((tree.mods.flags & PUBLIC) != 0 && !classNameMatchesFileName(c, env)) {
                 log.error(tree.pos(),
@@ -358,8 +360,10 @@ public class Enter extends JCTree.Visitor {
         } else {
             if (!tree.name.isEmpty() &&
                 !chk.checkUniqueClassName(tree.pos(), tree.name, enclScope)) {
-                result = null;
-                return;
+            	// FIXME COLUMBUS HACK BEGIN
+                //result = null;
+                //return;
+            	// COLUMBUS HACK END
             }
             if (owner.kind == TYP) {
                 // We are seeing a member class.
@@ -380,9 +384,12 @@ public class Enter extends JCTree.Visitor {
         // Enter class into `compiled' table and enclosing scope.
         if (chk.compiled.get(c.flatname) != null) {
             duplicateClass(tree.pos(), c);
-            result = types.createErrorType(tree.name, (TypeSymbol)owner, Type.noType);
-            tree.sym = (ClassSymbol)result.tsym;
-            return;
+
+        	// FIXME COLUMBUS HACK BEGIN
+            //result = types.createErrorType(tree.name, (TypeSymbol)owner, Type.noType);
+            //tree.sym = (ClassSymbol)result.tsym;
+            //return;
+            // COLUMBUS HACK END
         }
         chk.compiled.put(c.flatname, c);
         enclScope.enter(c);

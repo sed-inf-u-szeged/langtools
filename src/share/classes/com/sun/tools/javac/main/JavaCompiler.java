@@ -26,6 +26,7 @@
 package com.sun.tools.javac.main;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -948,6 +949,10 @@ public class JavaCompiler {
             if (!filesSoFar.contains(fileObject)) {
                 filesSoFar.add(fileObject);
                 trees.append(parse(fileObject));
+                
+                // storing the comments by file
+                JavadocTokenizer.commentMap.put(fileObject.getName(), new ArrayList<JANComment>( JavadocTokenizer.comments ));
+                JavadocTokenizer.comments.clear();
             }
         }
         return trees.toList();

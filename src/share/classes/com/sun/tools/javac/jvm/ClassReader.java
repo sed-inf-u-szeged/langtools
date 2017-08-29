@@ -43,9 +43,12 @@ import javax.tools.StandardJavaFileManager;
 
 import static javax.tools.StandardLocation.*;
 
+import com.sun.tools.javac.columbus.DuplicatedHack;
 import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Lint.LintCategory;
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
+import com.sun.tools.javac.code.Symbol.PackageSymbol;
 import com.sun.tools.javac.code.Type.*;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.code.Symtab;
@@ -2359,7 +2362,17 @@ public class ClassReader {
         c.completer = thisCompleter;
         return c;
     }
-
+    
+	public ClassSymbol enterHackedIfDuplicated(Name name, TypeSymbol owner) {
+        Name flatname = TypeSymbol.formFlatName(name, owner);
+        ClassSymbol c = DuplicatedHack.classesNotVisitedEarly.get(flatname);
+        if (c == null) {
+        	return enterClass(name, owner);
+        } else {
+        	return enterClass_hacked(name, owner);
+        }
+	}
+    
     /** Create a new toplevel or member class symbol with given name
      *  and owner and enter in `classes' unless already there.
      */
@@ -2369,6 +2382,7 @@ public class ClassReader {
         if (c == null) {
             c = defineClass(name, owner);
             classes.put(flatname, c);
+            DuplicatedHack.classesNotVisitedEarly.put(flatname,c);
         } else if ((c.name != name || c.owner != owner) && owner.kind == TYP && c.owner.kind == PCK) {
             // reassign fields of classes that might have been loaded with
             // their flat names.
@@ -2377,6 +2391,28 @@ public class ClassReader {
             c.owner = owner;
             c.fullname = ClassSymbol.formFullName(name, owner);
         }
+        return c;
+    }
+
+    public ClassSymbol enterClass_hacked(Name name, TypeSymbol owner) {
+        final String duplicatedSign = "@DUP";
+        final String orig = name.toString();
+        final Name origFlatname = TypeSymbol.formFlatName(name, owner);
+        Name newFlatname = origFlatname;
+
+        int i = 1;
+        newFlatname = names.fromString(origFlatname + duplicatedSign + i);
+        //if we search it in the classes, it find dont duplicated classes, because of cp or sp
+        while( DuplicatedHack.classesNotVisitedEarly.get(newFlatname) != null ) {
+              newFlatname  = names.fromString(origFlatname + duplicatedSign+ ++i);
+        }
+        DuplicatedHack.duplicatedTypeDeclarations.put(newFlatname, origFlatname);
+        name = names.fromString(name + duplicatedSign + i);
+        
+        ClassSymbol c = defineClass(name, owner);
+        c.name = names.fromString(orig);
+        classes.put(newFlatname, c);
+        DuplicatedHack.classesNotVisitedEarly.put(newFlatname, c);
         return c;
     }
 
@@ -2682,6 +2718,7 @@ public class ClassReader {
             : (ClassSymbol) p.members_field.lookup(classname).sym;
         if (c == null) {
             c = enterClass(classname, p);
+            DuplicatedHack.classesNotVisitedEarly.remove(c.flatname);
             if (c.classfile == null) // only update the file if's it's newly created
                 c.classfile = file;
             if (isPkgInfo) {

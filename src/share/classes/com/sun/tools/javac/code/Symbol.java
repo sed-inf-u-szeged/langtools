@@ -730,10 +730,16 @@ public abstract class Symbol extends AnnoConstruct implements Element {
             if (kind == TYP && type.hasTag(TYPEVAR)) {
                 return list;
             }
-            for (Scope.Entry e = members().elems; e != null; e = e.sibling) {
-                if (e.sym != null && (e.sym.flags() & SYNTHETIC) == 0 && e.sym.owner == this)
-                    list = list.prepend(e.sym);
+            // FIXME COLUMBUS HACK BEGIN
+            //for (Scope.Entry e = members().elems; e != null; e = e.sibling) {
+            Scope m = members();
+            if (m != null) {
+                for (Scope.Entry e = m.elems; e != null; e = e.sibling) {
+                    if (e.sym != null && (e.sym.flags() & SYNTHETIC) == 0 && e.sym.owner == this)
+                        list = list.prepend(e.sym);
+                }
             }
+            // COLUMBUS HACK END
             return list;
         }
 

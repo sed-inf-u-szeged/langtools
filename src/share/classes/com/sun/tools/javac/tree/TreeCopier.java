@@ -239,7 +239,7 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
 
     public JCTree visitLiteral(LiteralTree node, P p) {
         JCLiteral t = (JCLiteral) node;
-        return M.at(t.pos).Literal(t.typetag, t.value);
+        return M.at(t.pos).Literal(t.typetag, t.value, t.format);
     }
 
     public JCTree visitMethod(MethodTree node, P p) {

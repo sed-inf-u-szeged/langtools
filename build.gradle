@@ -1,0 +1,20 @@
+apply plugin: 'java'
+defaultTasks 'jar'
+
+jar.baseName = 'langtools'
+buildDir = file (buildDir.getPath() + "/$jar.baseName")
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/share/classes'
+        }
+    }
+}
+
+// Copies everything except the java sources into the jar
+jar {
+    from ('src/share/classes') {
+        exclude '**/*.java'
+    }
+}

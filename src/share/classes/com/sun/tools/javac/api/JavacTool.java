@@ -168,6 +168,8 @@ public final class JavacTool implements JavaCompiler {
         if (options == null)
             return;
 
+        handleJANOptions( options );
+
         final Options optionTable = Options.instance(context);
         Log log = Log.instance(context);
 
@@ -227,6 +229,32 @@ public final class JavacTool implements JavaCompiler {
         }
 
         optionTable.notifyListeners();
+    }
+
+    private static void handleJANOptions( Iterable<String> options )
+    {
+        Iterator<String> iter = options.iterator();
+        while ( iter.hasNext() )
+        {
+            String clO = iter.next();
+            for ( JANOption janO : JANOptions.validOptions )
+            {
+                if ( clO.equalsIgnoreCase(janO.name()) )
+                {
+                    String mapName = janO.name().replace('-',' ').trim();
+                    iter.remove();
+                    if ( ! janO.hasArgs() )
+                    {
+                        JANOptions.set(mapName, "true");
+                    }
+                    else
+                    {
+                        JANOptions.set(mapName, iter.next());
+                        iter.remove();
+                    }
+                }
+            }
+        }
     }
 
     public int run(InputStream in, OutputStream out, OutputStream err, String... arguments) {

@@ -643,13 +643,19 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         }
         DiagnosticPosition prevLintPos = deferredLintHandler.setPos(tree.pos());
         try {
-            if (TreeInfo.isEnumInit(tree)) {
+            // FIXME COLUMBUS HACK BEGIN
+            //if (TreeInfo.isEnumInit(tree)) {
+            if (TreeInfo.isEnumInit(tree) && tree.vartype instanceof JCIdent) {
                 attr.attribIdentAsEnumType(localEnv, (JCIdent)tree.vartype);
             } else {
+                if (TreeInfo.isEnumInit(tree) && !(tree.vartype instanceof JCIdent)) {
+                    log.rawError(tree.pos, "[COLUMBUS HACK] Unexpected vartype member for JCVariableDecl node");
+                }
                 attr.attribType(tree.vartype, localEnv);
                 if (TreeInfo.isReceiverParam(tree))
                     checkReceiver(tree, localEnv);
             }
+            // COLUMBUS HACK END
         } finally {
             deferredLintHandler.setPos(prevLintPos);
         }

@@ -58,6 +58,10 @@ public class Flags {
     }
 
     public static EnumSet<Flag> asFlagSet(long flags) {
+        return asFlagSet(flags, true);
+    }
+
+    public static EnumSet<Flag> asFlagSet(long flags, boolean checkUnknown) {
         EnumSet<Flag> flagSet = EnumSet.noneOf(Flag.class);
         for (Flag flag : Flag.values()) {
             if ((flags & flag.value) != 0) {
@@ -65,7 +69,8 @@ public class Flags {
                 flags &= ~flag.value;
             }
         }
-        Assert.check(flags == 0, "Flags parameter contains unknown flags " + flags);
+        if (checkUnknown)
+            Assert.check(flags == 0, "Flags parameter contains unknown flags " + flags);
         return flagSet;
     }
 
