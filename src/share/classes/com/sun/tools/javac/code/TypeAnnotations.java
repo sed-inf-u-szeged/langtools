@@ -1049,7 +1049,11 @@ public class TypeAnnotations {
         @Override
         public void visitMethodDef(final JCMethodDecl tree) {
             if (tree.sym == null) {
-                Assert.error("Visiting tree node before memberEnter");
+                // FIXME COLUMBUS HACK BEGIN
+                //Assert.error("Visiting tree node before memberEnter");
+                log.rawError(tree.pos, "[COLUMBUS HACK] Missing sym in TypeAnnotationPositions.visitMethodDef()");
+                return;
+                // COLUMBUS HACK END
             }
             if (sigOnly) {
                 if (!tree.mods.annotations.isEmpty()) {
@@ -1153,7 +1157,11 @@ public class TypeAnnotations {
                 // Nothing to do for separateAnnotationsKinds if
                 // there are no annotations of either kind.
             } else if (tree.sym == null) {
-                Assert.error("Visiting tree node before memberEnter");
+                // FIXME COLUMBUS HACK BEGIN
+                //Assert.error("Visiting tree node before memberEnter");
+                log.rawError(tree.pos, "[COLUMBUS HACK] Missing sym in TypeAnnotationPositions.visitVarDef()");
+                return;
+                // COLUMBUS HACK END
             } else if (tree.sym.getKind() == ElementKind.PARAMETER) {
                 // Parameters are handled in visitMethodDef or visitLambda.
             } else if (tree.sym.getKind() == ElementKind.FIELD) {

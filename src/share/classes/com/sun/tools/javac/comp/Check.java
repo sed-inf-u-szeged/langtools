@@ -2797,7 +2797,15 @@ public class Check {
     }
 
     public void validateTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
-        Assert.checkNonNull(a.type, "annotation tree hasn't been attributed yet: " + a);
+        // FIXME COLUMBUS HACK BEGIN
+        //Assert.checkNonNull(a.type, "annotation tree hasn't been attributed yet: " + a);
+        try {
+            Assert.checkNonNull(a.type, "annotation tree hasn't been attributed yet: " + a);
+        } catch (AssertionError e) {
+            log.rawError(a.pos, "[COLUMBUS HACK] Catch an AssertionError: " + e);
+            return;
+        }
+        // COLUMBUS HACK END
         validateAnnotationTree(a);
 
         if (a.hasTag(TYPE_ANNOTATION) &&
